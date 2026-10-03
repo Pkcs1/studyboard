@@ -1,0 +1,111 @@
+@import "tailwindcss";
+
+/* Dark mode is switched on by <html data-theme="dark">, not by the OS setting,
+   so light mode stays the default as the spec asks. */
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+/* =========================================================
+   DESIGN TOKENS — change the whole look from this one block.
+   ========================================================= */
+:root {
+  /* Brand palette ("Kinetic Geometry") */
+  --cream: #f5efe6;
+  --orange: #ff7a3d;
+  --teal: #0e9594;
+  --indigo: #5b4b7a;
+  --plum: #2b1233;
+  --yellow: #ffa400;
+
+  /* Semantic roles (what components actually use) */
+  --bg: var(--cream);
+  --surface: #fffaf3;
+  --ink: var(--plum); /* main text */
+  --ink-muted: #6b5a70; /* secondary text, still readable on cream */
+  --line: #e2d6c6; /* borders, dividers */
+  --accent: var(--orange);
+  --on-accent: var(--plum); /* text on top of accent buttons */
+  --dot: rgb(43 18 51 / 0.12); /* dot-grid texture */
+  --glow: transparent;
+
+  /* Status colors */
+  --status-todo: var(--indigo);
+  --status-doing: var(--teal);
+  --status-done: var(--orange);
+}
+
+[data-theme="dark"] {
+  --bg: #0c0a0d;
+  --surface: #17131a;
+  --ink: #f5efe6;
+  --ink-muted: #a89cab;
+  --line: #2c2530;
+  --accent: #ff6a1a; /* neon orange */
+  --on-accent: #0c0a0d;
+  --dot: rgb(245 239 230 / 0.07);
+  --glow: rgb(255 106 26 / 0.35);
+
+  --status-todo: #9d8cc4;
+  --status-doing: #2fd1cf;
+  --status-done: #ff6a1a;
+}
+
+/* Expose tokens to Tailwind so classes like bg-surface / text-ink work. */
+@theme inline {
+  --color-cream: var(--cream);
+  --color-orange: var(--orange);
+  --color-teal: var(--teal);
+  --color-indigo: var(--indigo);
+  --color-plum: var(--plum);
+  --color-yellow: var(--yellow);
+
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-ink: var(--ink);
+  --color-ink-muted: var(--ink-muted);
+  --color-line: var(--line);
+  --color-accent: var(--accent);
+  --color-on-accent: var(--on-accent);
+
+  --font-display: var(--font-unbounded);
+  --font-sans: var(--font-inter);
+  --font-mono: var(--font-jetbrains);
+
+  --radius-card: 1.25rem;
+}
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-inter), system-ui, sans-serif;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* ---------- Reusable decorative utilities ---------- */
+
+/* Quiet dot-grid background texture */
+.dot-grid {
+  background-image: radial-gradient(var(--dot) 1.2px, transparent 1.2px);
+  background-size: 22px 22px;
+}
+
+/* Soft neon glow, only visible in dark mode (glow is transparent in light) */
+.glow {
+  box-shadow: 0 0 40px -8px var(--glow);
+}
+
+/* Visible keyboard focus everywhere */
+:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: 6px;
+}
+
+/* Respect the device's reduced-motion setting for CSS transitions too */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}

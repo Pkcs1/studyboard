@@ -8,6 +8,7 @@ import { updateTopicStatus, createTopic, deleteTopic } from "@/app/actions/topic
 import { createCourse, seedDefaultCourse } from "@/app/actions/courses";
 import { StatusShape } from "@/components/StatusShape";
 import { Button, Card, DashMark } from "@/components/ui";
+import { TopicWorkspace } from "./TopicWorkspace";
 
 const NEXT_STATUS: Record<Status, Status> = {
   not_started: "in_progress",
@@ -30,6 +31,7 @@ export function CourseView({
     selectedCourseId || initialCourses[0]?.id || "",
   );
   const [topics, setTopics] = useState<Topic[]>(initialTopics);
+  const [expandedTopicId, setExpandedTopicId] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
   // Modals / forms
@@ -292,43 +294,69 @@ export function CourseView({
           <Card className="p-0 sm:p-0 overflow-hidden divide-y-2 divide-line">
             {topics.map((topic) => {
               const weekPad = String(topic.week_number).padStart(2, "0");
+              const isExpanded = expandedTopicId === topic.id;
+
               return (
-                <div
-                  key={topic.id}
-                  className="group flex items-center justify-between gap-4 px-5 py-4 transition-colors hover:bg-bg sm:px-6"
-                >
-                  <div className="flex items-center gap-4 sm:gap-6 min-w-0">
-                    <span className="font-display text-2xl sm:text-3xl font-black text-ink-muted group-hover:text-accent transition-colors shrink-0">
-                      {weekPad}
-                    </span>
-                    <div className="min-w-0">
-                      <p className="font-semibold text-base sm:text-lg truncate text-ink">
-                        {topic.title}
-                      </p>
-                      <p className="font-mono text-xs text-ink-muted">Week {topic.week_number}</p>
+                <div key={topic.id} className="transition-colors">
+                  <div
+                    onClick={() => setExpandedTopicId(isExpanded ? null : topic.id)}
+                    className="group flex cursor-pointer items-center justify-between gap-4 px-5 py-4 hover:bg-bg sm:px-6"
+                  >
+                    <div className="flex items-center gap-4 sm:gap-6 min-w-0">
+                      <span className="font-display text-2xl sm:text-3xl font-black text-ink-muted group-hover:text-accent transition-colors shrink-0">
+                        {weekPad}
+                      </span>
+                      <div className="min-w-0">
+                        <p className="font-semibold text-base sm:text-lg truncate text-ink">
+                          {topic.title}
+                        </p>
+                        <p className="font-mono text-xs text-ink-muted flex items-center gap-2">
+                          <span>Week {topic.week_number}</span>
+                          <span className="text-[11px] text-accent font-semibold">
+                            {isExpanded ? "▲ Hide Workspace" : "▼ Open Materials & Notes"}
+                          </span>
+                        </p>
+                      </div>
+                    </div>
+
+                    <div
+                      className="flex items-center gap-3 shrink-0"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      {/* One-tap status changer */}
+                      <button
+                        type="button"
+                        onClick={() => handleCycleStatus(topic.id, topic.status)}
+                        title={`Current: ${topic.status.replace("_", " ")}. Click to advance status.`}
+                        className="cursor-pointer p-1 rounded-full transition-transform active:scale-90 hover:bg-surface"
+                      >
+                        <StatusShape status={topic.status} size={42} />
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteTopic(topic.id)}
+                        title="Delete topic"
+                        className="opacity-0 group-hover:opacity-100 transition-opacity p-2 text-ink-muted hover:text-orange text-xs font-mono cursor-pointer"
+                      >
+                        ✕
+                      </button>
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-3 shrink-0">
-                    {/* One-tap status changer */}
-                    <button
-                      type="button"
-                      onClick={() => handleCycleStatus(topic.id, topic.status)}
-                      title={`Current: ${topic.status.replace("_", " ")}. Click to advance status.`}
-                      className="cursor-pointer p-1 rounded-full transition-transform active:scale-90 hover:bg-surface"
-                    >
-                      <StatusShape status={topic.status} size={42} />
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => handleDeleteTopic(topic.id)}
-                      title="Delete topic"
-                      className="opacity-0 group-hover:opacity-100 transition-opacity p-2 text-ink-muted hover:text-orange text-xs font-mono"
-                    >
-                      ✕
-                    </button>
-                  </div>
+                  <AnimatePresence>
+                    {isExpanded && (
+                      <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: "auto" }}
+                        exit={{ opacity: 0, height: 0 }}
+                        transition={{ duration: 0.25, ease: "easeInOut" }}
+                        className="overflow-hidden"
+                      >
+                        <TopicWorkspace topicId={topic.id} />
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </div>
               );
             })}

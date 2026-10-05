@@ -25,7 +25,7 @@ export function CourseView({
   selectedCourseId?: string;
 }) {
   const router = useRouter();
-  const [courses, setCourses] = useState<Course[]>(initialCourses);
+  const courses = initialCourses;
   const [activeCourseId, setActiveCourseId] = useState<string>(
     selectedCourseId || initialCourses[0]?.id || "",
   );
@@ -91,12 +91,10 @@ export function CourseView({
     startTransition(async () => {
       const res = await createCourse(newCourseName, newCourseCode);
       if (res.course) {
-        setCourses((prev) => [...prev, res.course!]);
-        setActiveCourseId(res.course.id);
-        setTopics([]);
+        setShowAddCourse(false);
         setNewCourseName("");
         setNewCourseCode("");
-        setShowAddCourse(false);
+        router.push(`/personal?courseId=${res.course.id}`);
       }
     });
   };
@@ -105,8 +103,7 @@ export function CourseView({
     startTransition(async () => {
       const res = await seedDefaultCourse();
       if (res.course) {
-        setCourses([res.course]);
-        setActiveCourseId(res.course.id);
+        router.push(`/personal?courseId=${res.course.id}`);
         router.refresh();
       }
     });

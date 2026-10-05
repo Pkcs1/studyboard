@@ -21,6 +21,7 @@ export default async function PersonalPage(props: {
   return (
     <div className="pt-6">
       <CourseView
+        key={activeCourseId}
         initialCourses={courses}
         initialTopics={topics}
         selectedCourseId={activeCourseId}

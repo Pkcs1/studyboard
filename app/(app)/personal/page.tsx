@@ -1,23 +1,30 @@
 import type { Metadata } from "next";
-import { Card, DashMark } from "@/components/ui";
+import { getCourses } from "@/app/actions/courses";
+import { getTopics } from "@/app/actions/topics";
+import { CourseView } from "./CourseView";
 
-export const metadata: Metadata = { title: "Personal · Studyboard" };
+export const metadata: Metadata = {
+  title: "Personal Dashboard · Studyboard",
+  description: "Track course topics and study progress.",
+};
 
-/* Placeholder until the progress tracker milestone. */
-export default function PersonalPage() {
+export default async function PersonalPage(props: {
+  searchParams: Promise<{ courseId?: string }>;
+}) {
+  const searchParams = await props.searchParams;
+  const courses = await getCourses();
+
+  // Pick requested course or default to first course
+  const activeCourseId = searchParams.courseId || courses[0]?.id || "";
+  const topics = activeCourseId ? await getTopics(activeCourseId) : [];
+
   return (
-    <section className="pt-8">
-      <p className="font-mono text-xs uppercase tracking-[0.2em] text-ink-muted">Personal dashboard</p>
-      <h1 className="mt-3 font-display text-4xl font-black uppercase leading-none tracking-tight sm:text-6xl">
-        You&apos;re in
-        <DashMark />
-      </h1>
-      <Card className="mt-8 max-w-lg">
-        <p className="text-ink-muted">
-          Login works. Your topic tracker for <strong className="text-ink">Algoritma dan Pemrograman 1</strong>{" "}
-          arrives in the next milestone.
-        </p>
-      </Card>
-    </section>
+    <div className="pt-6">
+      <CourseView
+        initialCourses={courses}
+        initialTopics={topics}
+        selectedCourseId={activeCourseId}
+      />
+    </div>
   );
 }
